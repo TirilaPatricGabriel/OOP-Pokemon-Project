@@ -4,6 +4,64 @@
 
 using namespace std;
 
+class Ability{
+    string name;
+    float damage;
+    bool aoe;
+
+public:
+    Ability();
+    Ability(string name, float damage, bool aoe);
+    Ability(const Ability& abl);
+    ~Ability();
+
+    Ability& operator =(const Ability& abl);
+    friend istream& operator >>(istream& in, Ability& abl);
+    friend ostream& operator <<(ostream& out, const Ability& abl);
+};
+
+Ability::Ability(){
+    this->name = "Unknown";
+    this->damage = 0;
+    this->aoe = 0;
+}
+Ability::Ability(string name, float damage, bool aoe){
+    this->name = name;
+    this->damage = damage;
+    this->aoe = aoe;
+}
+Ability::Ability(const Ability& abl){
+    this->name = abl.name;
+    this->damage = abl.damage;
+    this->aoe = abl.aoe;
+}
+Ability::~Ability(){
+    this->name.clear();
+    this->damage = 0;
+    this->aoe = 0;
+}
+
+Ability& Ability::operator =(const Ability& abl){
+    this->name = abl.name;
+    this->damage = abl.damage;
+    this->aoe = abl.aoe;
+
+    return *this;
+}
+istream& operator >>(istream& in, Ability& abl){
+    cout<<"============CREATE NEW ABILITY!====================="<<endl;
+    cout<<"Name: "; in>>abl.name;
+    cout<<"Damage: "; in>>abl.damage;
+    cout<<"AOE?: "; in>>abl.aoe;
+
+    return in;
+}
+ostream& operator <<(ostream& out, const Ability& abl){
+    out<<"Nume: "<<abl.name<<endl<<"Damage: "<<abl.damage<<endl;
+    abl.aoe == false ? cout<<"Ability does 0 aoe damage"<<endl : cout<<"Ability does aoe damage";
+    return out;
+}
+
 class Pokemon{
 protected:
     const int idPokemon;
@@ -67,8 +125,7 @@ istream& operator >>(istream& in, Pokemon& pkm){
     cout<<"Iq: "; in>>pkm.iq;
     cout<<"Movement speed: "; in>>pkm.movementSpeed;
     cout<<"Ability power: "; in>>pkm.ap;
-    cout<<"Attack speed: "; in>>pkm.color;
-    cout<<"Color: "; in>>pkm.attackSpeed;
+    cout<<"Attack speed: "; in>>pkm.attackSpeed;
 
     return in;
 }
@@ -95,68 +152,12 @@ Pokemon& Pokemon::operator =(const Pokemon& pkm){
     return *this;
 }
 
-class Ability{
-    string name;
-    float damage;
-    bool aoe;
-
-public:
-    Ability();
-    Ability(string name, float damage, bool aoe);
-    Ability(const Ability& abl);
-    ~Ability();
-
-    Ability& operator =(const Ability& abl);
-    friend istream& operator >>(istream& in, Ability& abl);
-    friend ostream& operator <<(ostream& out, const Ability& abl);
-};
-
-Ability::Ability(){
-    this->name = "Unknown";
-    this->damage = 0;
-    this->aoe = 0;
-}
-Ability::Ability(string name, float damage, bool aoe){
-    this->name = name;
-    this->damage = damage;
-    this->aoe = aoe;
-}
-Ability::Ability(const Ability& abl){
-    this->name = abl.name;
-    this->damage = abl.damage;
-    this->aoe = abl.aoe;
-}
-Ability::~Ability(){
-    this->name.clear();
-    this->damage = 0;
-    this->aoe = 0;
-}
-
-Ability& Ability::operator =(const Ability& abl){
-    this->name = abl.name;
-    this->damage = abl.damage;
-    this->aoe = abl.aoe;
-}
-istream& operator >>(istream& in, Ability& abl){
-    cout<<"============CREATE NEW ABILITY!====================="<<endl;
-    cout<<"Name: "; in>>abl.name;
-    cout<<"Damage: "; in>>abl.damage;
-    cout<<"AOE?: "; in>>abl.aoe;
-
-    return in;
-}
-ostream& operator <<(ostream& out, const Ability& abl){
-    out<<"Nume: "<<abl.name<<endl<<"Damage: "<<abl.damage<<endl;
-    abl.aoe == false ? cout<<"Ability does 0 aoe damage"<<endl : cout<<"Ability does aoe damage";
-    return out;
-}
-
 class AquaPokemon:public Pokemon{
 protected:
     float pressure, power, maximumVolume;
 public:
     AquaPokemon();
-    AquaPokemon(float pressure, float power, float maximumVolume);
+    AquaPokemon(int, int, string, string, float, float, float, float pressure, float power, float maximumVolume);
     AquaPokemon(const AquaPokemon& pkm);
     ~AquaPokemon();
     
@@ -165,17 +166,18 @@ public:
     AquaPokemon& operator =(const AquaPokemon& pkm);
 };
 
-AquaPokemon::AquaPokemon(){
+AquaPokemon::AquaPokemon():Pokemon(){
     this->pressure = 0;
     this->power = 0;
     this->maximumVolume = 0;
 }
-AquaPokemon::AquaPokemon(float pressure, float power, float maximumVolume){
+AquaPokemon::AquaPokemon(int age, int iq, string name, string color, float ms, float ap, float as, float pressure, float power, float maximumVolume)
+:Pokemon(age, iq, name, color, ms, ap, as){
     this->pressure = pressure;
     this->power = power;
     this->maximumVolume = maximumVolume;
 }
-AquaPokemon::AquaPokemon(const AquaPokemon& pkm){
+AquaPokemon::AquaPokemon(const AquaPokemon& pkm):Pokemon(pkm){
     this->pressure = pkm.pressure;
     this->power = pkm.power;
     this->maximumVolume = pkm.maximumVolume;
@@ -188,6 +190,7 @@ AquaPokemon::~AquaPokemon(){
 
 istream& operator >>(istream& in, AquaPokemon& pkm){
     cout<<"==============CREATE A NEW AQUA POKEMON!================"<<endl;
+    in>>(Pokemon&)pkm;
     cout<<"Power: "; in>>pkm.power;
     cout<<"Pressure: "; in>>pkm.pressure;
     cout<<"Maximum volume of water: "; in>>pkm.maximumVolume;
@@ -195,16 +198,20 @@ istream& operator >>(istream& in, AquaPokemon& pkm){
     return in;
 }
 ostream& operator <<(ostream& out, const AquaPokemon& pkm){
-    out<<"Power: "; out<<pkm.power;
-    out<<"Pressure: "; out<<pkm.pressure;
-    out<<"Maximum volume of water: "; out<<pkm.maximumVolume;
+    out<<(Pokemon&)pkm;
+    out<<"Power: "; out<<pkm.power<<endl;
+    out<<"Pressure: "; out<<pkm.pressure<<endl;
+    out<<"Maximum volume of water: "; out<<pkm.maximumVolume<<endl;
 
     return out;
 }
 AquaPokemon& AquaPokemon::operator =(const AquaPokemon& pkm){
-    this->pressure = pkm.pressure;
-    this->power = pkm.power;
-    this->maximumVolume = pkm.maximumVolume;
+    if(this!=&pkm) {
+        Pokemon::operator=(pkm);
+        this->pressure = pkm.pressure;
+        this->power = pkm.power;
+        this->maximumVolume = pkm.maximumVolume;
+    }
 
     return *this;
 }
@@ -216,7 +223,7 @@ protected:
     string fuelSource;
 public:
     FirePokemon();
-    FirePokemon(int maximumTemperature, float intensity, float oxygenLevel, string fuelSource);
+    FirePokemon(int, int, string, string, float, float, float, int maximumTemperature, float intensity, float oxygenLevel, string fuelSource);
     FirePokemon(const FirePokemon& pkm);
     ~FirePokemon();
 
@@ -224,19 +231,20 @@ public:
     friend ostream& operator <<(ostream& out, const FirePokemon& pkm);
     FirePokemon& operator =(const FirePokemon& pkm);
 };
-FirePokemon::FirePokemon(){
+FirePokemon::FirePokemon():Pokemon(){
     this->maximumTemperature = 0;
     this->intensity = 0;
     this->oxygenLevel = 0;
     this->fuelSource = "";
 }
-FirePokemon::FirePokemon(int maximumTemperature, float intensity, float oxygenLevel, string fuelSource){
+FirePokemon::FirePokemon(int age, int iq, string name, string color, float ms, float ap, float as, int maximumTemperature, float intensity, float oxygenLevel, string fuelSource)
+:Pokemon(age, iq, name, color, ms, ap, as){
     this->maximumTemperature = maximumTemperature;
     this->intensity = intensity;
     this->oxygenLevel = oxygenLevel;
     this->fuelSource = fuelSource;
 }
-FirePokemon::FirePokemon(const FirePokemon& pkm){
+FirePokemon::FirePokemon(const FirePokemon& pkm):Pokemon(pkm){
     this->maximumTemperature = pkm.maximumTemperature;
     this->intensity = pkm.intensity;
     this->oxygenLevel = pkm.oxygenLevel;
@@ -251,6 +259,7 @@ FirePokemon::~FirePokemon(){
 
 istream& operator >>(istream& in, FirePokemon& pkm){
     cout<<"==============CREATE A NEW AQUA POKEMON!================"<<endl;
+    in>>(Pokemon&)pkm;
     cout<<"Intensity: "; in>>pkm.intensity;
     cout<<"Maximum Temperature: "; in>>pkm.maximumTemperature;
     cout<<"Average oxygen level: "; in>>pkm.oxygenLevel;
@@ -259,18 +268,23 @@ istream& operator >>(istream& in, FirePokemon& pkm){
     return in;
 }
 ostream& operator <<(ostream& out, const FirePokemon& pkm){
-    out<<"Intensity: "; out<<pkm.intensity;
-    out<<"Maximum Temperature: "; out<<pkm.maximumTemperature;
-    out<<"Average oxygen level: "; out<<pkm.oxygenLevel;
-    out<<"Fuel source: "; out<<pkm.fuelSource;
+    out<<(Pokemon&)pkm;
+    out<<"Intensity: "; out<<pkm.intensity<<endl;
+    out<<"Maximum Temperature: "; out<<pkm.maximumTemperature<<endl;
+    out<<"Average oxygen level: "; out<<pkm.oxygenLevel<<endl;
+    out<<"Fuel source: "; out<<pkm.fuelSource<<endl;
 
     return out;
 }
 FirePokemon& FirePokemon::operator =(const FirePokemon& pkm){
-    this->maximumTemperature = pkm.maximumTemperature;
-    this->intensity = pkm.intensity;
-    this->oxygenLevel = pkm.oxygenLevel;
-    this->fuelSource = pkm.fuelSource;
+
+    if(this!=&pkm){
+        Pokemon::operator=(pkm);
+        this->maximumTemperature = pkm.maximumTemperature;
+        this->intensity = pkm.intensity;
+        this->oxygenLevel = pkm.oxygenLevel;
+        this->fuelSource = pkm.fuelSource;
+    }
 
     return *this;
 }
@@ -283,7 +297,7 @@ protected:
     int minutesTilRecharge;
 public:
     ElectricityPokemon();
-    ElectricityPokemon(float wattage, bool stun, int minutesTilRecharge);
+    ElectricityPokemon(int, int, string, string, float, float, float, float wattage, bool stun, int minutesTilRecharge);
     ElectricityPokemon(const ElectricityPokemon& pkm);
     ~ElectricityPokemon();
 
@@ -291,17 +305,18 @@ public:
     friend ostream& operator <<(ostream& out, const ElectricityPokemon& pkm);
     ElectricityPokemon& operator =(const ElectricityPokemon& pkm);
 };
-ElectricityPokemon::ElectricityPokemon(){
+ElectricityPokemon::ElectricityPokemon():Pokemon(){
     this->wattage = 0;
     this->stun = 0;
     this->minutesTilRecharge = 0;
 }
-ElectricityPokemon::ElectricityPokemon(float wattage, bool stun, int minutesTilRecharge){
+ElectricityPokemon::ElectricityPokemon(int age, int iq, string name, string color, float ms, float ap, float as, float wattage, bool stun, int minutesTilRecharge)
+:Pokemon(age, iq, name, color, ms, ap, as){
     this->wattage = wattage;
     this->stun = stun;
     this->minutesTilRecharge = minutesTilRecharge;
 }
-ElectricityPokemon::ElectricityPokemon(const ElectricityPokemon& pkm){
+ElectricityPokemon::ElectricityPokemon(const ElectricityPokemon& pkm):Pokemon(pkm){
     this->wattage = pkm.wattage;
     this->stun = pkm.stun;
     this->minutesTilRecharge = pkm.minutesTilRecharge;
@@ -314,6 +329,7 @@ ElectricityPokemon::~ElectricityPokemon(){
 
 istream& operator >>(istream& in, ElectricityPokemon& pkm){
     cout<<"==============CREATE A NEW AQUA POKEMON!================"<<endl;
+    in>>(Pokemon&)pkm;
     cout<<"Wattage: "; in>>pkm.wattage;
     cout<<"Minutes until recharge is needed: "; in>>pkm.minutesTilRecharge;
     cout<<"Stun: "; in>>pkm.stun;
@@ -321,31 +337,47 @@ istream& operator >>(istream& in, ElectricityPokemon& pkm){
     return in;
 }
 ostream& operator <<(ostream& out, const ElectricityPokemon& pkm){
-    cout<<"Wattage: "; out<<pkm.wattage;
-    cout<<"Minutes until recharge is needed: "; out<<pkm.minutesTilRecharge;
-    cout<<"Stun: "; out<<pkm.stun;
+    out<<(Pokemon&)pkm;
+    cout<<"Wattage: "; out<<pkm.wattage<<endl;
+    cout<<"Minutes until recharge is needed: "; out<<pkm.minutesTilRecharge<<endl;
+    cout<<"Stun: "; out<<pkm.stun<<endl;
 
     return out;
 }
 ElectricityPokemon& ElectricityPokemon::operator =(const ElectricityPokemon& pkm){
-    this->wattage = pkm.wattage;
-    this->stun = pkm.stun;
-    this->minutesTilRecharge = pkm.minutesTilRecharge;
+
+    if(this!=&pkm){
+        Pokemon::operator=(pkm);
+        this->wattage = pkm.wattage;
+        this->stun = pkm.stun;
+        this->minutesTilRecharge = pkm.minutesTilRecharge;
+    }
 
     return *this;
 }
 
-
-
-
-
-
-
-
-
-
+int Pokemon::pokemonNumber = 0;
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+//    Pokemon pkm;
+//    cin>>pkm;
+//    Pokemon pkm2(pkm), pkm3;
+//    pkm3 = pkm;
+//    cout<<pkm2<<endl<<pkm3;
+//    AquaPokemon pkm, pkm2;
+//    cin>>pkm;
+//    pkm2 = pkm;
+//    AquaPokemon pkm3(pkm2);
+//    cout<<pkm2<<endl<<pkm3;
+//    FirePokemon pkm, pkm2;
+//    cin>>pkm;
+//    pkm2 = pkm;
+//    FirePokemon pkm3(pkm2);
+//    cout<<pkm2<<endl<<pkm3;
+    ElectricityPokemon pkm, pkm2;
+    cin>>pkm;
+    pkm2 = pkm;
+    ElectricityPokemon pkm3(pkm2);
+    cout<<pkm2<<endl<<pkm3;
     return 0;
 }
