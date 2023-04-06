@@ -386,6 +386,8 @@ public:
     Deck(const Deck& obj);
     ~Deck();
 
+    string getName() { return this->name; }
+
     Deck& operator =(const Deck& obj);
 
     friend istream& operator >>(istream& in, Deck& deck);
@@ -430,8 +432,9 @@ istream& operator >>(istream& in, Deck& deck){
                     cout<<"Pokemon "<<i<<": "<<endl;
                     Pokemon pkm;
                     cin>>pkm;
-                    deck.pokemons.push_back(&pkm);
-                    allPokemons.push_back(&pkm);
+                    allPokemons.push_back(new Pokemon);
+                    cin>>*allPokemons.back();
+                    deck.pokemons.push_back(allPokemons.back());
                 }
             }
             break;
@@ -439,10 +442,9 @@ istream& operator >>(istream& in, Deck& deck){
         case 2: {
             for(int i=0; i<3; i++){
                 cout<<"Pokemon "<<i<<": "<<endl;
-                Pokemon pkm;
-                cin>>pkm;
-                deck.pokemons.push_back(&pkm);
-                allPokemons.push_back(&pkm);
+                allPokemons.push_back(new Pokemon);
+                cin>>*allPokemons.back();
+                deck.pokemons.push_back(allPokemons.back());
             }
             break;
         }
@@ -471,7 +473,10 @@ private:
     Player(string name, vector<Deck*> decks);
     Player(const Player& ply);
     ~Player();
-    
+
+    void deleteDeck(string name);
+    void addDeck();
+
     Player& operator =(const Player& ply);
     friend istream& operator >>(istream& in, Player& ply);
     friend ostream& operator <<(ostream& out, const Player& ply);
@@ -520,6 +525,43 @@ ostream& operator <<(ostream& out, const Player& ply){
         out<<*ply.decks[i];
     }
     return out;
+}
+
+void Player::deleteDeck(string name){
+    for(int i=0; i<this->decks.size(); i++){
+        if(this->decks[i]->getName() == name){
+            this->decks.erase(this->decks.begin()+i);
+            cout<<"Delete done!"<<endl;
+            return;
+        }
+    }
+    cout<<"Deck was not found!"<<endl;
+}
+void Player::addDeck(){
+    int inp;
+    cout<<"Add new deck (1) or find an existing deck? (2)"; cin>>inp;
+    switch(inp){
+        case 1: {
+            Deck dk;
+            allDecks.push_back(new Deck);
+            cin>>*allDecks.back();
+            this->decks.push_back(allDecks.back());
+            break;
+        }
+        case 2: {
+            for(int i=0; i<allDecks.size(); i++){
+                cout<<*allDecks[i];
+                cout<<"Is this the desired deck? Yes (1) or no (0): "; cin>>inp;
+                if(inp){
+                    this->decks.push_back(allDecks[i]);
+                    return;
+                }
+            }
+
+            cout<<"Deck was not found!"<<endl;
+            break;
+        }
+    }
 }
 
 int Deck::deckNumber = 0;
