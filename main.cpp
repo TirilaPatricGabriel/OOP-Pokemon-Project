@@ -354,9 +354,9 @@ istream& operator >>(istream& in, ElectricityPokemon& pkm){
 }
 ostream& operator <<(ostream& out, const ElectricityPokemon& pkm){
     out<<(Pokemon&)pkm;
-    cout<<"Wattage: "; out<<pkm.wattage<<endl;
-    cout<<"Minutes until recharge is needed: "; out<<pkm.minutesTilRecharge<<endl;
-    cout<<"Stun: "; out<<pkm.stun<<endl;
+    out<<"Wattage: "; out<<pkm.wattage<<endl;
+    out<<"Minutes until recharge is needed: "; out<<pkm.minutesTilRecharge<<endl;
+    out<<"Stun: "; out<<pkm.stun<<endl;
 
     return out;
 }
@@ -373,6 +373,157 @@ ElectricityPokemon& ElectricityPokemon::operator =(const ElectricityPokemon& pkm
 }
 
 int Pokemon::pokemonNumber = 0;
+vector<Pokemon*> allPokemons;
+
+class Deck{
+    const int idDeck;
+    static int deckNumber;
+    string name;
+    vector<Pokemon*> pokemons;
+public:
+    Deck();
+    Deck(string name, vector<Pokemon*> pokemons);
+    Deck(const Deck& obj);
+    ~Deck();
+
+    Deck& operator =(const Deck& obj);
+
+    friend istream& operator >>(istream& in, Deck& deck);
+    friend ostream& operator <<(ostream& out, const Deck& deck);
+};
+Deck::Deck():idDeck(deckNumber++){
+    this->pokemons = {};
+}
+Deck::Deck(string name, vector<Pokemon*> pokemons):idDeck(deckNumber++){
+    this->name = name;
+    this->pokemons = pokemons;
+}
+Deck::Deck(const Deck& obj):idDeck(deckNumber++){
+    this->name = obj.name;
+    this->pokemons = obj.pokemons;
+}
+Deck::~Deck(){
+    this->name.clear();
+    this->pokemons.clear();
+}
+Deck& Deck::operator =(const Deck& obj){
+    this->pokemons = obj.pokemons;
+    return *this;
+}
+istream& operator >>(istream& in, Deck& deck){
+    cout<<"Name: "; in>>deck.name;
+
+    int inp;
+    cout<<"This deck will need three pokemons! Search (1) or create (2)?"; cin>>inp;
+    switch(inp){
+        case 1: {
+            for(int i=0; i<allPokemons.size() && deck.pokemons.size() < 3; i++){
+                cout<<*allPokemons[i];
+                cout<<"Is this the desired pokemon? Yes (1) or no (0): "; cin>>inp;
+                if(inp){
+                    deck.pokemons.push_back(allPokemons[i]);
+                }
+            }
+            if(deck.pokemons.size() < 3){
+                cout<<"You will need to create another pokemon!"<<endl;
+                for(int i=deck.pokemons.size(); i<3; i++){
+                    cout<<"Pokemon "<<i<<": "<<endl;
+                    Pokemon pkm;
+                    cin>>pkm;
+                    deck.pokemons.push_back(&pkm);
+                    allPokemons.push_back(&pkm);
+                }
+            }
+            break;
+        }
+        case 2: {
+            for(int i=0; i<3; i++){
+                cout<<"Pokemon "<<i<<": "<<endl;
+                Pokemon pkm;
+                cin>>pkm;
+                deck.pokemons.push_back(&pkm);
+                allPokemons.push_back(&pkm);
+            }
+            break;
+        }
+    }
+
+    return in;
+}
+ostream& operator <<(ostream& out, const Deck& deck){
+    out<<deck.name;
+    for(int i=0; i<deck.pokemons.size(); i++){
+        out<<*deck.pokemons[i];
+    }
+    return out;
+}
+
+vector<Deck*> allDecks;
+
+class Player{
+    const int idPlayer;
+    static int playerNumber;
+
+    string name;
+    vector<Deck*> decks;
+private:
+    Player();
+    Player(string name, vector<Deck*> decks);
+    Player(const Player& ply);
+    ~Player();
+    
+    Player& operator =(const Player& ply);
+    friend istream& operator >>(istream& in, Player& ply);
+    friend ostream& operator <<(ostream& out, const Player& ply);
+};
+Player::Player():idPlayer(playerNumber++){
+    this->name = "";
+    this->decks = {};
+}
+Player::Player(string name, vector<Deck*> decks):idPlayer(playerNumber++){
+    this->name = name;
+    this->decks = decks;
+}
+Player::Player(const Player& ply):idPlayer(playerNumber++){
+    this->name = ply.name;
+    this->decks = ply.decks;
+}
+Player::~Player(){
+    this->name.clear();
+    this->decks.clear();
+}
+Player& Player::operator=(const Player& ply){
+    this->name = ply.name;
+    this->decks = ply.decks;
+    return *this;
+}
+istream& operator >>(istream& in, Player& ply){
+    cout<<"Name: "; in>>ply.name;
+
+    int inp;
+    cout<<"This player must have atleast one pokemon deck!"<<endl;
+    while(true){
+        cout<<"Add new pokemon deck: ";
+        Deck dk;
+        cin>>dk;
+        ply.decks.push_back(&dk);
+        allDecks.push_back(&dk);
+        cout<<"Add another deck for this player? Yes (1) or no (0): "; cin>>inp;
+        if(!inp) break;
+    }
+
+    return in;
+}
+ostream& operator <<(ostream& out, const Player& ply){
+    out<<ply.name;
+    for(int i=0; i<ply.decks.size(); i++){
+        out<<*ply.decks[i];
+    }
+    return out;
+}
+
+int Deck::deckNumber = 0;
+int Player::playerNumber = 0;
 
 int main() {
     Ability ab;
