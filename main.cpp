@@ -4,6 +4,12 @@
 
 using namespace std;
 
+class IOInterface{
+public:
+    virtual istream& citire(istream&) = 0;
+    virtual ostream& afisare(ostream&) const = 0;
+};
+
 class Ability{
     string name;
     float damage;
@@ -62,7 +68,7 @@ ostream& operator <<(ostream& out, const Ability& abl){
     return out;
 }
 
-class Pokemon{
+class Pokemon:public IOInterface{
 protected:
     const int idPokemon;
     static int pokemonNumber;
@@ -71,10 +77,15 @@ protected:
     float movementSpeed, ap, attackSpeed;
     vector<Ability> abilities;
 public:
+    virtual float getDamagePerSecond() const = 0;
+
     Pokemon();
     Pokemon(int, int, string, string, float, float, float, vector<Ability>);
     Pokemon(const Pokemon& pkm);
     ~Pokemon();
+
+    virtual istream& citire(istream& in);
+    virtual ostream& afisare(ostream& out) const;
 
     friend istream& operator >>(istream& in, Pokemon& pkm);
     friend ostream& operator <<(ostream& out, const Pokemon& pkm);
@@ -123,38 +134,10 @@ Pokemon::~Pokemon(){
 }
 
 istream& operator >>(istream& in, Pokemon& pkm){
-    cout<<"================CREATE YOUR OWN POKEMON!==================="<<endl;
-    cout<<"Name: "; in>>pkm.name;
-    cout<<"Color: "; in>>pkm.color;
-    cout<<"Age: "; in>>pkm.age;
-    cout<<"Iq: "; in>>pkm.iq;
-    cout<<"Movement speed: "; in>>pkm.movementSpeed;
-    cout<<"Ability power: "; in>>pkm.ap;
-    cout<<"Attack speed: "; in>>pkm.attackSpeed;
-    int n;
-    cout<<"Number of abilities: "; in>>n;
-    for(int i=0; i<n; i++){
-        Ability ab;
-        cin>>ab;
-        pkm.abilities.push_back(ab);
-    }
-
-    return in;
+    return pkm.citire(in);
 }
 ostream& operator <<(ostream& out, const Pokemon& pkm){
-    out<<"Name: "; out<<pkm.name<<endl;
-    out<<"Color: "; out<<pkm.color<<endl;
-    out<<"Age: "; out<<pkm.age<<endl;
-    out<<"Iq: "; out<<pkm.iq<<endl;
-    out<<"Movement speed: "; out<<pkm.movementSpeed<<endl;
-    out<<"Ability power: "; out<<pkm.ap<<endl;
-    out<<"Attack speed: "; out<<pkm.attackSpeed<<endl;
-    cout<<"Abilities: "<<endl;
-    for(int i=0; i<pkm.abilities.size(); i++){
-        out<<pkm.abilities[i]<<endl;
-    }
-
-    return out;
+    return pkm.afisare(out);
 }
 Pokemon& Pokemon::operator =(const Pokemon& pkm){
     this->age = pkm.age;
@@ -168,10 +151,47 @@ Pokemon& Pokemon::operator =(const Pokemon& pkm){
     return *this;
 }
 
+istream& Pokemon::citire(istream& in){
+    cout<<"================CREATE YOUR OWN POKEMON!==================="<<endl;
+    cout<<"Name: "; in>>this->name;
+    cout<<"Color: "; in>>this->color;
+    cout<<"Age: "; in>>this->age;
+    cout<<"Iq: "; in>>this->iq;
+    cout<<"Movement speed: "; in>>this->movementSpeed;
+    cout<<"Ability power: "; in>>this->ap;
+    cout<<"Attack speed: "; in>>this->attackSpeed;
+    int n;
+    cout<<"Number of abilities: "; in>>n;
+    for(int i=0; i<n; i++){
+        Ability ab;
+        cin>>ab;
+        this->abilities.push_back(ab);
+    }
+
+    return in;
+}
+ostream& Pokemon::afisare(ostream& out) const {
+    out<<"Name: "; out<<this->name<<endl;
+    out<<"Color: "; out<<this->color<<endl;
+    out<<"Age: "; out<<this->age<<endl;
+    out<<"Iq: "; out<<this->iq<<endl;
+    out<<"Movement speed: "; out<<this->movementSpeed<<endl;
+    out<<"Ability power: "; out<<this->ap<<endl;
+    out<<"Attack speed: "; out<<this->attackSpeed<<endl;
+    cout<<"Abilities: "<<endl;
+    for(int i=0; i<this->abilities.size(); i++){
+        out<<this->abilities[i]<<endl;
+    }
+
+    return out;  
+}
+
 class AquaPokemon:public Pokemon{
 protected:
     float pressure, power, maximumVolume;
 public:
+    virtual float getDamagePerSecond() const;
+
     AquaPokemon();
     AquaPokemon(int, int, string, string, float, float, float, vector<Ability>, float pressure, float power, float maximumVolume);
     AquaPokemon(const AquaPokemon& pkm);
@@ -203,6 +223,10 @@ AquaPokemon::~AquaPokemon(){
     this->power = 0;
     this->maximumVolume = 0;
 }
+
+float AquaPokemon::getDamagePerSecond() const {
+    return this->attackSpeed*this->ap*this->power*this->pressure;
+};
 
 istream& operator >>(istream& in, AquaPokemon& pkm){
     cout<<"==============CREATE A NEW AQUA POKEMON!================"<<endl;
@@ -238,6 +262,8 @@ protected:
     float intensity, oxygenLevel;
     string fuelSource;
 public:
+    virtual float getDamagePerSecond() const;
+
     FirePokemon();
     FirePokemon(int, int, string, string, float, float, float, vector<Ability>, int maximumTemperature, float intensity, float oxygenLevel, string fuelSource);
     FirePokemon(const FirePokemon& pkm);
@@ -271,6 +297,10 @@ FirePokemon::~FirePokemon(){
     this->intensity = 0;
     this->oxygenLevel = 0;
     this->fuelSource.clear();
+}
+
+float FirePokemon::getDamagePerSecond() const {
+    return this->ap*this->attackSpeed*this->intensity*this->oxygenLevel;
 }
 
 istream& operator >>(istream& in, FirePokemon& pkm){
@@ -312,6 +342,8 @@ protected:
     bool stun;
     int minutesTilRecharge;
 public:
+    virtual float getDamagePerSecond() const;
+
     ElectricityPokemon();
     ElectricityPokemon(int, int, string, string, float, float, float, vector<Ability>, float wattage, bool stun, int minutesTilRecharge);
     ElectricityPokemon(const ElectricityPokemon& pkm);
@@ -343,6 +375,10 @@ ElectricityPokemon::~ElectricityPokemon(){
     this->minutesTilRecharge = 0;
 }
 
+float ElectricityPokemon::getDamagePerSecond() const {
+    return this->ap*this->attackSpeed*this->wattage;
+}
+
 istream& operator >>(istream& in, ElectricityPokemon& pkm){
     cout<<"==============CREATE A NEW AQUA POKEMON!================"<<endl;
     in>>(Pokemon&)pkm;
@@ -371,6 +407,13 @@ ElectricityPokemon& ElectricityPokemon::operator =(const ElectricityPokemon& pkm
 
     return *this;
 }
+
+//class StormPokemon:public ElectricityPokemon, public AquaPokemon{
+//
+//public:
+//    StormPokemon();
+//    ~StormPokemon();
+//};
 
 int Pokemon::pokemonNumber = 0;
 vector<Pokemon*> allPokemons;
@@ -416,6 +459,8 @@ istream& operator >>(istream& in, Deck& deck){
     cout<<"Name: "; in>>deck.name;
 
     int inp;
+
+    if(!deck.pokemons.empty()) deck.pokemons.clear();
     cout<<"This deck will need three pokemons! Search (1) or create (2)?"; cin>>inp;
     switch(inp){
         case 1: {
@@ -506,6 +551,7 @@ istream& operator >>(istream& in, Player& ply){
     cout<<"Name: "; in>>ply.name;
 
     int inp;
+    if(!ply.decks.empty()) ply.decks.clear();
     cout<<"This player must have atleast one pokemon deck!"<<endl;
     while(true){
         cout<<"Add new pokemon deck: ";
