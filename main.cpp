@@ -68,6 +68,7 @@ ostream& operator <<(ostream& out, const Ability& abl){
     return out;
 }
 
+
 class Pokemon:public IOInterface{
 protected:
     const int idPokemon;
@@ -186,7 +187,7 @@ ostream& Pokemon::afisare(ostream& out) const {
     return out;  
 }
 
-class AquaPokemon:public Pokemon{
+class AquaPokemon:virtual public Pokemon{
 protected:
     float pressure, power, maximumVolume;
 public:
@@ -194,6 +195,7 @@ public:
 
     AquaPokemon();
     AquaPokemon(int, int, string, string, float, float, float, vector<Ability>, float pressure, float power, float maximumVolume);
+    AquaPokemon(float pressure, float power, float maximumVolume);
     AquaPokemon(const AquaPokemon& pkm);
     ~AquaPokemon();
     
@@ -212,6 +214,11 @@ AquaPokemon::AquaPokemon():Pokemon(){
 }
 AquaPokemon::AquaPokemon(int age, int iq, string name, string color, float ms, float ap, float as, vector<Ability> abilities, float pressure, float power, float maximumVolume)
 :Pokemon(age, iq, name, color, ms, ap, as, abilities){
+    this->pressure = pressure;
+    this->power = power;
+    this->maximumVolume = maximumVolume;
+}
+AquaPokemon::AquaPokemon(float pressure, float power, float maximumVolume){
     this->pressure = pressure;
     this->power = power;
     this->maximumVolume = maximumVolume;
@@ -266,7 +273,7 @@ AquaPokemon& AquaPokemon::operator =(const AquaPokemon& pkm){
     return *this;
 }
 
-class FirePokemon:public Pokemon{
+class FirePokemon:virtual public Pokemon{
 protected:
     int maximumTemperature;
     float intensity, oxygenLevel;
@@ -279,6 +286,7 @@ public:
 
     FirePokemon();
     FirePokemon(int, int, string, string, float, float, float, vector<Ability>, int maximumTemperature, float intensity, float oxygenLevel, string fuelSource);
+    FirePokemon(int maximumTemperature, float intensity, float oxygenLevel, string fuelSource);
     FirePokemon(const FirePokemon& pkm);
     ~FirePokemon();
 
@@ -297,6 +305,11 @@ FirePokemon::FirePokemon(int age, int iq, string name, string color, float ms, f
     this->maximumTemperature = maximumTemperature;
     this->intensity = intensity;
     this->oxygenLevel = oxygenLevel;
+    this->fuelSource = fuelSource;
+}
+FirePokemon::FirePokemon(int maximumTemperature, float intensity, float oxygenLevel, string fuelSource){
+    this->maximumTemperature = maximumTemperature;
+    this->intensity = intensity;
     this->fuelSource = fuelSource;
 }
 FirePokemon::FirePokemon(const FirePokemon& pkm):Pokemon(pkm){
@@ -327,7 +340,6 @@ istream& FirePokemon::citire(istream& in){
 
     return in;
 }
-
 ostream& FirePokemon::afisare(ostream& out) const{
     ///out<<(Pokemon&)pkm;
     Pokemon::afisare(out);
@@ -359,7 +371,7 @@ FirePokemon& FirePokemon::operator =(const FirePokemon& pkm){
 }
 
 
-class ElectricityPokemon:public Pokemon{
+class ElectricityPokemon:virtual public Pokemon{
 protected:
     float wattage;
     bool stun;
@@ -372,6 +384,7 @@ public:
 
     ElectricityPokemon();
     ElectricityPokemon(int, int, string, string, float, float, float, vector<Ability>, float wattage, bool stun, int minutesTilRecharge);
+    ElectricityPokemon(float wattage, bool stun, int minutesTilRecharge);  // pentru diamant
     ElectricityPokemon(const ElectricityPokemon& pkm);
     ~ElectricityPokemon();
 
@@ -386,6 +399,11 @@ ElectricityPokemon::ElectricityPokemon():Pokemon(){
 }
 ElectricityPokemon::ElectricityPokemon(int age, int iq, string name, string color, float ms, float ap, float as, vector<Ability> abilities, float wattage, bool stun, int minutesTilRecharge)
 :Pokemon(age, iq, name, color, ms, ap, as, abilities){
+    this->wattage = wattage;
+    this->stun = stun;
+    this->minutesTilRecharge = minutesTilRecharge;
+}
+ElectricityPokemon::ElectricityPokemon(float wattage, bool stun, int minutesTilRecharge){
     this->wattage = wattage;
     this->stun = stun;
     this->minutesTilRecharge = minutesTilRecharge;
@@ -443,15 +461,172 @@ ElectricityPokemon& ElectricityPokemon::operator =(const ElectricityPokemon& pkm
     return *this;
 }
 
-//class StormPokemon:public ElectricityPokemon, public AquaPokemon{
-//
-//public:
-//    StormPokemon();
-//    ~StormPokemon();
-//};
+class StormPokemon:public ElectricityPokemon, public AquaPokemon{
+    int level, windSpeed;
+public:
+    float getDamagePerSecond() const;
+
+    StormPokemon();
+    StormPokemon(int age, int iq, string name, string color, float ms, float ap, float as,
+                 vector<Ability> abilities, float wattage, bool stun, int minutesTilRecharge, float pressure, float power,
+                 float maximumVolume, int level, int windSpeed);
+    ~StormPokemon();
+
+    istream& citire(istream& in);
+    ostream& afisare(ostream& out) const;
+    friend istream& operator >>(istream& in, StormPokemon& pkm);
+    friend ostream& operator <<(ostream& out, const StormPokemon& pkm);
+    StormPokemon& operator =(const StormPokemon& pkm);
+};
+StormPokemon::StormPokemon():Pokemon(), ElectricityPokemon(), AquaPokemon(){
+    this->level = 0;
+    this->windSpeed = 0;
+}
+StormPokemon::StormPokemon(int age, int iq, string name, string color, float ms, float ap, float as,
+                           vector<Ability> abilities, float wattage, bool stun, int minutesTilRecharge, float pressure, float power,
+                           float maximumVolume, int level, int windSpeed)
+                           :Pokemon(age, iq, name, color, ms, ap, as, abilities),
+                           ElectricityPokemon(wattage, stun, minutesTilRecharge),
+                           AquaPokemon(pressure, power, maximumVolume){
+    this->level = level;
+    this->windSpeed = windSpeed;
+}
+StormPokemon::~StormPokemon(){
+    this->level = 0;
+    this->windSpeed = 0;
+}
+
+float StormPokemon::getDamagePerSecond() const {
+    return this->ap*this->attackSpeed*this->wattage*this->attackSpeed*this->ap*this->power*this->pressure*this->level;
+}
+
+istream& StormPokemon::citire(istream& in){
+    cout<<"==============CREATE A NEW STORM POKEMON!================"<<endl;
+    Pokemon::citire(in);
+    cout<<"Wattage: "; in>>this->wattage;
+    cout<<"Minutes until recharge is needed: "; in>>this->minutesTilRecharge;
+    cout<<"Stun: "; in>>this->stun;
+    cout<<"Power: "; in>>this->power;
+    cout<<"Pressure: "; in>>this->pressure;
+    cout<<"Maximum volume of water: "; in>>this->maximumVolume;
+    cout<<"Max storm level: "; in>>this->level;
+    cout<<"Max wind speed: "; in>>this->windSpeed;
+
+    return in;
+}
+ostream& StormPokemon::afisare(ostream& out) const {
+    Pokemon::afisare(out);
+    out<<"Wattage: "; out<<this->wattage<<endl;
+    out<<"Minutes until recharge is needed: "; out<<this->minutesTilRecharge<<endl;
+    out<<"Stun: "; out<<this->stun<<endl;
+    out<<"Power: "; out<<this->power<<endl;
+    out<<"Pressure: "; out<<this->pressure<<endl;
+    out<<"Maximum volume of water: "; out<<this->maximumVolume<<endl;
+    out<<"Maximum level of storm: "; out<<this->level;
+    out<<"Maximum wind speeds: "; out<<this->windSpeed;
+
+    return out;
+}
+istream& operator >>(istream& in, StormPokemon& pkm){
+    return pkm.citire(in);
+}
+ostream& operator <<(ostream& out, StormPokemon& pkm){
+    return pkm.afisare(out);
+}
+StormPokemon& StormPokemon::operator=(const StormPokemon& pkm){
+    if(this!=&pkm){
+        AquaPokemon::operator=(pkm);
+        ElectricityPokemon::operator=(pkm);
+        this->level = pkm.level;
+        this->windSpeed = pkm.windSpeed;
+    }
+    return *this;
+}
+
+class LavaPokemon:public FirePokemon, public AquaPokemon{
+    float damageResistance;
+    bool stun;
+public:
+    float getDamagePerSecond() const;
+
+    LavaPokemon();
+    LavaPokemon(int age, int iq, string name, string color, float ms, float ap, float as,
+                vector<Ability> abilities,  int maximumTemperature, float intensity, float oxygenLevel, string fuelSource,
+                float pressure, float power, float maximumVolume, float damageRes, bool stun);
+    ~LavaPokemon(){};
+    
+    istream& citire(istream& in);
+    ostream& afisare(ostream& out) const;
+    friend istream& operator >>(istream& in, LavaPokemon& pkm);
+    friend ostream& operator <<(ostream& out, const LavaPokemon& pkm);
+    LavaPokemon& operator =(const LavaPokemon& pkm);
+};
+
+LavaPokemon::LavaPokemon():Pokemon(), FirePokemon(), AquaPokemon(){
+    this->damageResistance = 0;
+    this->stun = 0;
+}
+LavaPokemon::LavaPokemon(int age, int iq, string name, string color, float ms, float ap, float as,
+                         vector<Ability> abilities,  int maximumTemperature, float intensity, float oxygenLevel, string fuelSource,
+                         float pressure, float power, float maximumVolume, float damageRes, bool stun)
+                         :Pokemon(age, iq, name, color, ms, ap, as, abilities),
+                         FirePokemon(maximumTemperature, intensity, oxygenLevel, fuelSource),
+                         AquaPokemon(pressure, power, maximumVolume)
+{
+    this->damageResistance = damageRes;
+    this->stun = stun;
+}
+
+float LavaPokemon::getDamagePerSecond() const {
+    return this->ap*this->attackSpeed*this->intensity*this->oxygenLevel*this->attackSpeed*this->ap*this->power*this->pressure;
+}
+
+istream& LavaPokemon::citire(istream& in){
+    Pokemon::citire(in);
+    cout<<"Intensity: "; in>>this->intensity;
+    cout<<"Maximum Temperature: "; in>>this->maximumTemperature;
+    cout<<"Average oxygen level: "; in>>this->oxygenLevel;
+    cout<<"Fuel source: "; in>>this->fuelSource;
+    cout<<"Power: "; in>>this->power;
+    cout<<"Pressure: "; in>>this->pressure;
+    cout<<"Maximum volume of water: "; in>>this->maximumVolume;
+    cout<<"Damage resistance: "; in>>this->damageResistance;
+    cout<<"Stun? "; in>>this->stun;
+    return in;
+}
+ostream& LavaPokemon::afisare(ostream& out) const {
+    Pokemon::afisare(out);
+    out<<"Intensity: "; out<<this->intensity<<endl;
+    out<<"Maximum Temperature: "; out<<this->maximumTemperature<<endl;
+    out<<"Average oxygen level: "; out<<this->oxygenLevel<<endl;
+    out<<"Fuel source: "; out<<this->fuelSource<<endl;
+    out<<"Power: "; out<<this->power<<endl;
+    out<<"Pressure: "; out<<this->pressure<<endl;
+    out<<"Maximum volume of water: "; out<<this->maximumVolume<<endl;
+    out<<"Damage resistance: "; out<<this->damageResistance<<endl;
+    out<<"Stun: "; out<<this->stun<<endl;
+    return out;
+}
+istream& operator <<(istream& in, LavaPokemon& pkm){
+    return pkm.citire(in);
+}
+ostream& operator >>(ostream& out, const LavaPokemon& pkm){
+    return pkm.afisare(out);
+}
+LavaPokemon& LavaPokemon::operator=(const LavaPokemon &pkm) {
+    if(this!=&pkm){
+        FirePokemon::operator=(pkm);
+        AquaPokemon::operator=(pkm);
+        this->damageResistance = pkm.damageResistance;
+        this->stun = pkm.stun;
+    }
+    return *this;
+}
+
 
 int Pokemon::pokemonNumber = 0;
 vector<Pokemon*> allPokemons;
+
 
 class Deck{
     const int idDeck;
@@ -511,7 +686,7 @@ istream& operator >>(istream& in, Deck& deck){
                 for(int i=deck.pokemons.size(); i<3; i++){
                     cout<<"Pokemon "<<i<<": "<<endl;
                     int choice;
-                    cout<<"Please choose between Aqua (1), Fire (2) or Electricity (3): "<<endl; cin>>choice;
+                    cout<<"Please choose between Aqua (1), Fire (2), Electricity (3), Storm (4) or Lava (5): "<<endl; cin>>choice;
                     switch(choice){
                         case 1: {
                             allPokemons.push_back(new AquaPokemon);
@@ -528,6 +703,16 @@ istream& operator >>(istream& in, Deck& deck){
                             cin>>*allPokemons.back();
                             break;
                         }
+                        case 4: {
+                            allPokemons.push_back(new StormPokemon);
+                            cin>>*allPokemons.back();
+                            break;
+                        }
+                        case 5: {
+                            allPokemons.push_back(new LavaPokemon);
+                            cin>>*allPokemons.back();
+                            break;
+                        }
                     }
                     deck.pokemons.push_back(allPokemons.back());
                 }
@@ -538,7 +723,7 @@ istream& operator >>(istream& in, Deck& deck){
             for(int i=0; i<3; i++){
                 cout<<"Pokemon "<<i<<": "<<endl;
                 int choice;
-                cout<<"Please choose between Aqua (1), Fire (2) or Electricity (3): "<<endl; cin>>choice;
+                cout<<"Please choose between Aqua (1), Fire (2), Electricity (3), Storm (4) or Lava (5): "<<endl; cin>>choice;
                 switch(choice){
                     case 1: {
                         allPokemons.push_back(new AquaPokemon);
@@ -552,6 +737,16 @@ istream& operator >>(istream& in, Deck& deck){
                     }
                     case 3: {
                         allPokemons.push_back(new ElectricityPokemon);
+                        cin>>*allPokemons.back();
+                        break;
+                    }
+                    case 4: {
+                        allPokemons.push_back(new StormPokemon);
+                        cin>>*allPokemons.back();
+                        break;
+                    }
+                    case 5: {
+                        allPokemons.push_back(new LavaPokemon);
                         cin>>*allPokemons.back();
                         break;
                     }
