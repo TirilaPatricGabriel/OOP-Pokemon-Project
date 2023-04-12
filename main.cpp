@@ -85,6 +85,8 @@ public:
     Pokemon(const Pokemon& pkm);
     ~Pokemon();
 
+    string getName() { return this->name; }
+
     virtual istream& citire(istream& in);
     virtual ostream& afisare(ostream& out) const;
 
@@ -774,11 +776,13 @@ class Player{
 
     string name;
     vector<Deck*> decks;
-private:
+public:
     Player();
     Player(string name, vector<Deck*> decks);
     Player(const Player& ply);
     ~Player();
+
+    string getName() { return this->name; }
 
     void deleteDeck(string name);
     void addDeck();
@@ -803,6 +807,7 @@ Player::~Player(){
     this->name.clear();
     this->decks.clear();
 }
+
 Player& Player::operator=(const Player& ply){
     this->name = ply.name;
     this->decks = ply.decks;
@@ -871,11 +876,171 @@ void Player::addDeck(){
     }
 }
 
+vector<Player*> allPlayers;
+
 int Deck::deckNumber = 0;
 int Player::playerNumber = 0;
 
 int main() {
-    cout<<"Hello World!"<<endl;
+    int inp;
+    cout<<"Create (1), read(2), update (3), delete (4): "; cin>>inp;
+    switch(inp){
+        case 1: {
+            cout<<"Create player (1), deck (2), pokemon (3): "; cin>>inp;
+            switch(inp){
+                case 1: {
+                    allPlayers.push_back(new Player);
+                    cin>>*allPlayers.back();
+                    break;
+                }
+                case 2: {
+                    allDecks.push_back(new Deck);
+                    cin>>*allDecks.back();
+                    break;
+                }
+                case 3: {
+                    cout<<"Fire (1), Aqua (2), Electricity (3), Lava (4), Storm (5): "; cin>>inp;
+                    switch(inp){
+                        case 1: {
+                            allPokemons.push_back(new FirePokemon);
+                            cin>>*allPokemons.back();
+                            break;
+                        }
+                        case 2: {
+                            allPokemons.push_back(new AquaPokemon);
+                            cin>>*allPokemons.back();
+                            break;
+                        }
+                        case 3: {
+                            allPokemons.push_back(new ElectricityPokemon);
+                            cin>>*allPokemons.back();
+                            break;
+                        }
+                        case 4: {
+                            allPokemons.push_back(new LavaPokemon);
+                            cin>>*allPokemons.back();
+                            break;
+                        }
+                        case 5: {
+                            allPokemons.push_back(new StormPokemon);
+                            cin>>*allPokemons.back();
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case 2: {
+            cout<<"Read player (1), deck (2), pokemon (3): "; cin>>inp;
+            switch(inp){
+                case 1: {
+                    string name; cout<<"Name: "; cin>>name;
+                    for(int i=0; i<allPlayers.size(); i++){
+                        if(allPlayers[i]->getName() == name) {
+                            cout << *allPlayers[i];
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 2: {
+                    string name; cout<<"Name: "; cin>>name;
+                    for(int i=0; i<allDecks.size(); i++){
+                        if(allDecks[i]->getName() == name) {
+                            cout << *allDecks[i];
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 3: {
+                    string name; cout<<"Name: "; cin>>name;
+                    for(int i=0; i<allPokemons.size(); i++){
+                        if(allPokemons[i]->getName() == name) {
+                            cout << *allPokemons[i];
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case 3: {
+            cout<<"Update player (1), deck (2), pokemon (3): "; cin>>inp;
+            switch(inp){
+                case 1: {
+                    string name; cout<<"Name: "; cin>>name;
+                    for(int i=0; i<allPlayers.size(); i++){
+                        if(allPlayers[i]->getName() == name) {
+                            cin >> *allPlayers[i];
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 2: {
+                    string name; cout<<"Name: "; cin>>name;
+                    for(int i=0; i<allDecks.size(); i++){
+                        if(allDecks[i]->getName() == name) {
+                            cin >> *allDecks[i];
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 3: {
+                    string name; cout<<"Name: "; cin>>name;
+                    for(int i=0; i<allPokemons.size(); i++){
+                        if(allPokemons[i]->getName() == name) {
+                            cin >> *allPokemons[i];
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case 4: {
+            cout<<"Delete player (1), deck (2), pokemon (3): "; cin>>inp;
+            switch(inp){
+                case 1: {
+                    string name; cout<<"Name: "; cin>>name;
+                    for(int i=0; i<allPlayers.size(); i++){
+                        if(allPlayers[i]->getName() == name) {
+                            allPlayers.erase(allPlayers.begin() + i);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 2: {
+                    string name; cout<<"Name: "; cin>>name;
+                    for(int i=0; i<allDecks.size(); i++){
+                        if(allDecks[i]->getName() == name) {
+                            allDecks.erase(allDecks.begin() + i);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 3: {
+                    string name; cout<<"Name: "; cin>>name;
+                    for(int i=0; i<allPokemons.size(); i++){
+                        if(allPokemons[i]->getName() == name) {
+                            allPokemons.erase(allPokemons.begin() + i);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+    }
 
     return 0;
 }
